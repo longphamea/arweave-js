@@ -1,4 +1,5 @@
-import Axios, { AxiosResponse, AxiosRequestConfig, AxiosInstance } from "axios";
+import Axios, { AxiosResponse, AxiosRequestConfig, AxiosInstance } from 'axios'
+import AxiosAdapter from '@vespaiach/axios-fetch-adapter'
 
 export interface ApiConfig {
   host?: string;
@@ -10,29 +11,29 @@ export interface ApiConfig {
 }
 
 export default class Api {
-  public readonly METHOD_GET = "GET";
-  public readonly METHOD_POST = "POST";
+  public readonly METHOD_GET = 'GET'
+  public readonly METHOD_POST = 'POST'
 
-  public config!: ApiConfig;
+  public config!: ApiConfig
 
   constructor(config: ApiConfig) {
-    this.applyConfig(config);
+    this.applyConfig(config)
   }
 
   public applyConfig(config: ApiConfig) {
-    this.config = this.mergeDefaults(config);
+    this.config = this.mergeDefaults(config)
   }
 
   public getConfig() {
-    return this.config;
+    return this.config
   }
 
   private mergeDefaults(config: ApiConfig): ApiConfig {
-    const protocol = config.protocol || "http";
-    const port = config.port || (protocol === "https" ? 443 : 80);
+    const protocol = config.protocol || 'http'
+    const port = config.port || (protocol === 'https' ? 443 : 80)
 
     return {
-      host: config.host || "127.0.0.1",
+      host: config.host || '127.0.0.1',
       protocol,
       port,
       timeout: config.timeout || 20000,
@@ -46,13 +47,13 @@ export default class Api {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     try {
-      return await this.request().get<T>(endpoint, config);
+      return await this.request().get<T>(endpoint, config)
     } catch (error: any) {
       if (error.response && error.response.status) {
-        return error.response;
+        return error.response
       }
 
-      throw error;
+      throw error
     }
   }
 
@@ -62,13 +63,13 @@ export default class Api {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     try {
-      return await this.request().post(endpoint, body, config);
+      return await this.request().post(endpoint, body, config)
     } catch (error: any) {
       if (error.response && error.response.status) {
-        return error.response;
+        return error.response
       }
 
-      throw error;
+      throw error
     }
   }
 
@@ -81,22 +82,21 @@ export default class Api {
       baseURL: `${this.config.protocol}://${this.config.host}:${this.config.port}`,
       timeout: this.config.timeout,
       maxContentLength: 1024 * 1024 * 512,
-    });
+      adapter: AxiosAdapter,
+    })
 
     if (this.config.logging) {
       instance.interceptors.request.use((request) => {
-        this.config.logger!(`Requesting: ${request.baseURL}/${request.url}`);
-        return request;
-      });
+        this.config.logger!(`Requesting: ${request.baseURL}/${request.url}`)
+        return request
+      })
 
       instance.interceptors.response.use((response) => {
-        this.config.logger!(
-          `Response:   ${response.config.url} - ${response.status}`
-        );
-        return response;
-      });
+        this.config.logger!(`Response:   ${response.config.url} - ${response.status}`)
+        return response
+      })
     }
 
-    return instance;
+    return instance
   }
 }
